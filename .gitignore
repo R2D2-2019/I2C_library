@@ -12,3 +12,4 @@
 cmake*/
 CMakeLists.txt
 settings.json
+.cquery_cache
