@@ -80,7 +80,7 @@ namespace r2d2::i2c {
         init();
     }
     void i2c_bus_c::write(const uint_fast8_t address, const uint8_t data[],
-                          size_t &n) {
+                          const size_t &n) {
         _selected->TWI_MMR = 0; ///< Reset master mode register
         _selected->TWI_MMR = 0 << 12 | address << 16; ///< Set write and address
         _selected->TWI_IADR = 0; ///< Clear internal address
