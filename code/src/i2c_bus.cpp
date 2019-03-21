@@ -1,4 +1,4 @@
-#include "i2c_bus.hpp"
+#include "headers/i2c_bus.hpp"
 
 namespace r2d2::i2c {
     void i2c_bus_c::pin_init() {
@@ -20,19 +20,19 @@ namespace r2d2::i2c {
     void i2c_bus_c::clock_init() {
         if (_selected == TWI0) {
             if ((PMC->PMC_PCSR0 & (1 << ID_TWI0)) != (1 << ID_TWI0)) {
-                PMC->PMC_PCER0 = 1 << ID_TWI0;
+                PMC->PMC_PCER0 |= 1 << ID_TWI0;
             }
         } else if (_selected == TWI1) {
             if ((PMC->PMC_PCSR0 & (1 << ID_TWI1)) != (1 << ID_TWI1)) {
-                PMC->PMC_PCER0 = 1 << ID_TWI1;
+                PMC->PMC_PCER0 |= 1 << ID_TWI1;
             }
         }
 
-        _selected->TWI_CR = TWI_CR_SVEN;
-        _selected->TWI_CR = TWI_CR_SWRST;
-        _selected->TWI_CR = TWI_CR_SVDIS;
-        _selected->TWI_CR = TWI_CR_MSDIS;
-        _selected->TWI_CR = TWI_CR_MSEN;
+        _selected->TWI_CR |= TWI_CR_SVEN;
+        _selected->TWI_CR |= TWI_CR_SWRST;
+        _selected->TWI_CR |= TWI_CR_SVDIS;
+        _selected->TWI_CR |= TWI_CR_MSDIS;
+        _selected->TWI_CR |= TWI_CR_MSEN;
 
         static constexpr uint32_t masterClock =
             84000000;        ///< Master clock rate 84MHz
@@ -49,8 +49,8 @@ namespace r2d2::i2c {
             ckdiv++;  ///< Increase clock devider
             cLHDiv /= 2;
         }
-        _selected->TWI_CWGR = TWI_CWGR_CLDIV(cLHDiv) | TWI_CWGR_CHDIV(cLHDiv) |
-                              TWI_CWGR_CKDIV(ckdiv);
+        _selected->TWI_CWGR |= TWI_CWGR_CLDIV(cLHDiv) | TWI_CWGR_CHDIV(cLHDiv) |
+                               TWI_CWGR_CKDIV(ckdiv);
     }
     void i2c_bus_c::init() {
         static bool init_done = false;
@@ -92,16 +92,12 @@ namespace r2d2::i2c {
             if (status & TWI_SR_NACK) {
                 hwlib::cout << "status & NACK" << hwlib::endl;
             }
-
-            if (status & TWI_SR_TXRDY) {
-                write_byte(data[i]);
-            }
-        }
-
-        while (1) {
-            status = _selected->TWI_SR;
-            if (status & TWI_SR_TXRDY) {
-                break;
+            while (1) {
+                status = _selected->TWI_SR;
+                if (status & TWI_SR_TXRDY) {
+                    write_byte(data[i]);
+                    break;
+                }
             }
         }
 
@@ -123,10 +119,10 @@ namespace r2d2::i2c {
 
         if (count == 1) { ///< When only one byte needs to be read, transaction
                           ///< should be started and stopped at once.
-            _selected->TWI_CR = TWI_CR_START | TWI_CR_STOP;
+            _selected->TWI_CR |= TWI_CR_START | TWI_CR_STOP;
             stopTransaction = 1;
         } else {
-            _selected->TWI_CR = TWI_CR_START;
+            _selected->TWI_CR |= TWI_CR_START;
         }
 
         while (count > 0) {
@@ -136,7 +132,7 @@ namespace r2d2::i2c {
             }
 
             if (count == 1 && !stopTransaction) {
-                _selected->TWI_CR = TWI_CR_STOP;
+                _selected->TWI_CR |= TWI_CR_STOP;
                 stopTransaction = 1;
             }
 
