@@ -62,6 +62,7 @@ namespace r2d2::i2c {
         }
         pin_init();
         clock_init();
+        init_done = true;
     }
     void i2c_bus_c::write_byte(const uint8_t data) {
         _selected->TWI_THR = data;
