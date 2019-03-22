@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hwlib.hpp"
+#include <hwlib.hpp>
 
 namespace r2d2::i2c {
     class i2c_bus_c {

@@ -1,4 +1,4 @@
-#include "headers/i2c_bus.hpp"
+#include <i2c_bus.hpp>
 
 namespace r2d2::i2c {
     void i2c_bus_c::pin_init() {
