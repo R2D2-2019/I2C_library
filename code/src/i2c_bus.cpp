@@ -52,15 +52,24 @@ namespace r2d2::i2c {
                                TWI_CWGR_CKDIV(ckdiv);
     }
     void i2c_bus_c::init() {
+        //since you're always setting this to false at the start of this function; in stead of before this function is called
         static bool init_done = false;
+        
+        // this 'if' statement will never evaluate to true
         if (init_done) {
-            return;
+            return; //making this 'dead code'
         }
+        // i see the check you wanted to implement here and it's good practice to check whether your init function only runs once.
+        // Move the 'init_done' outside of this function, or don't asign it as false (only initialize)
+        // then after it has run once, and it's called again it'l be already set to true and the init funciton will return.
+        
+        
         if (_selected == nullptr) {
             assert(true == false);
         }
         pin_init();
         clock_init();
+        init_done = true;
     }
     void i2c_bus_c::write_byte(const uint8_t data) {
         _selected->TWI_THR = data;
