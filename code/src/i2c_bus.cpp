@@ -1,5 +1,5 @@
+#include <cassert>
 #include <i2c_bus.hpp>
-
 namespace r2d2::i2c {
     void i2c_bus_c::pin_init() {
         auto config_pin = [](uint32_t pin) {
@@ -34,9 +34,8 @@ namespace r2d2::i2c {
         _selected->TWI_CR |= TWI_CR_MSDIS;
         _selected->TWI_CR |= TWI_CR_MSEN;
 
-        static constexpr uint32_t masterClock =
-            84000000;        ///< Master clock rate 84MHz
-        uint32_t ckdiv = 0;  ///< Clock divider
+        constexpr uint32_t masterClock = 84000000; ///< Master clock rate 84MHz
+        uint32_t ckdiv = 0;                        ///< Clock divider
         uint32_t cLHDiv = 0; ///< Clock low and high divider
         if (SPEED > 400000) {
             return;
@@ -58,7 +57,7 @@ namespace r2d2::i2c {
             return;
         }
         if (_selected == nullptr) {
-            return;
+            assert(true == false);
         }
         pin_init();
         clock_init();
@@ -70,7 +69,7 @@ namespace r2d2::i2c {
         return _selected->TWI_RHR;
     }
     i2c_bus_c::i2c_bus_c(const interface &selected_interface,
-                         const uint32_t &SPEED)
+                         const uint32_t SPEED)
         : SPEED(SPEED) {
         if (selected_interface == interface::interface_0) {
             _selected = TWI0;
@@ -80,7 +79,7 @@ namespace r2d2::i2c {
         init();
     }
     void i2c_bus_c::write(const uint_fast8_t address, const uint8_t data[],
-                          const size_t &n) {
+                          const size_t n) {
         _selected->TWI_MMR = 0; ///< Reset master mode register
         _selected->TWI_MMR = 0 << 12 | address << 16; ///< Set write and address
         _selected->TWI_IADR = 0; ///< Clear internal address
@@ -106,7 +105,7 @@ namespace r2d2::i2c {
         };
     }
     void i2c_bus_c::read(const uint8_t address, uint8_t *data,
-                         const uint32_t &n) {
+                         const uint32_t n) {
 
         _selected->TWI_MMR = 0; ///< Reset master mode register
         _selected->TWI_MMR = 1 << 12 | address << 16; ///< Set read and address

@@ -15,10 +15,10 @@ namespace r2d2::i2c {
 
     public:
         enum class interface { interface_0, interface_1 };
-        i2c_bus_c(const interface &selected_interface, const uint32_t &SPEED);
+        i2c_bus_c(const interface &selected_interface, const uint32_t SPEED);
 
         void write(const uint_fast8_t address, const uint8_t data[],
-                   const size_t &n);
-        void read(const uint8_t address, uint8_t *data, const uint32_t &n);
+                   const size_t n);
+        void read(const uint8_t address, uint8_t *data, const uint32_t n);
     };
 }; // namespace r2d2::i2c
