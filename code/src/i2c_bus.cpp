@@ -1,4 +1,3 @@
-#include <cassert>
 #include <i2c_bus.hpp>
 namespace r2d2::i2c {
     void i2c_bus_c::pin_init() {
@@ -57,7 +56,7 @@ namespace r2d2::i2c {
             return; // making this 'dead code'
         }
         if (_selected == nullptr) {
-            assert(true == false);
+            HWLIB_PANIC_WITH_LOCATION;
         }
         pin_init();
         clock_init();
