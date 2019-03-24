@@ -53,7 +53,7 @@ namespace r2d2::i2c {
     void i2c_bus_c::init() {
         static bool init_done = false;
         if (init_done) {
-            return; // making this 'dead code'
+            return;
         }
         if (_selected == nullptr) {
             HWLIB_PANIC_WITH_LOCATION;
