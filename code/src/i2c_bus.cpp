@@ -1,22 +1,26 @@
 #include <i2c_bus.hpp>
+
 namespace r2d2::i2c {
+
     void i2c_bus_c::pin_init() {
-        auto config_pin = [](uint32_t pin) {
-            PIOA->PIO_ABSR &= (~pin & PIOA->PIO_ABSR);
-            PIOA->PIO_PDR = pin;
-            PIOA->PIO_IDR = pin;
-            PIOA->PIO_PUER = pin;
+        auto config_pin = [](uint32_t pin, Pio * pio) {
+            pio->PIO_ABSR &= (~pin & PIOA->PIO_ABSR);
+            pio->PIO_PDR = pin;
+            pio->PIO_IDR = pin;
+            pio->PIO_PUER = pin;
         };
 
         if (_selected == TWI0) {
-            config_pin(PIO_PA18A_TWCK0);
-            config_pin(PIO_PA17A_TWD0);
+            config_pin(PIO_PA18A_TWCK0, PIOA);
+            config_pin(PIO_PA17A_TWD0, PIOA);
         } else if (_selected == TWI1) {
-            config_pin(PIO_PB13A_TWCK1);
-            config_pin(PIO_PB12A_TWD1);
+            config_pin(PIO_PB13A_TWCK1, PIOB);
+            config_pin(PIO_PB12A_TWD1, PIOB);
         }
     }
+
     void i2c_bus_c::clock_init() {
+        // enable the peripheral clock for twi interface
         if (_selected == TWI0) {
             if ((PMC->PMC_PCSR0 & (1 << ID_TWI0)) != (1 << ID_TWI0)) {
                 PMC->PMC_PCER0 |= 1 << ID_TWI0;
@@ -27,12 +31,26 @@ namespace r2d2::i2c {
             }
         }
 
-        _selected->TWI_CR |= TWI_CR_SVEN;
-        _selected->TWI_CR |= TWI_CR_SWRST;
-        _selected->TWI_CR |= TWI_CR_SVDIS;
-        _selected->TWI_CR |= TWI_CR_MSDIS;
-        _selected->TWI_CR |= TWI_CR_MSEN;
+        // Disable PDC channel
+        _selected->TWI_PTCR = UART_PTCR_RXTDIS | UART_PTCR_TXTDIS;
 
+        // TWI Slave Mode Enabled
+        _selected->TWI_CR = TWI_CR_SVEN;
+
+        // TWI disable and sw reset
+        _selected->TWI_CR = TWI_CR_SWRST;
+        _selected->TWI_RHR;
+
+        // Wait for at least 10ms
+        hwlib::wait_ms(10);
+
+        // TWI Slave mode disabled, Twi master mode disabled
+        _selected->TWI_CR = TWI_CR_SVDIS | TWI_CR_MSDIS;
+
+        // Enable master mode
+        _selected->TWI_CR = TWI_CR_MSEN;
+
+        // this sets the twi frequency
         constexpr uint32_t masterClock = 84000000; ///< Master clock rate 84MHz
         uint32_t ckdiv = 0;                        ///< Clock divider
         uint32_t cLHDiv = 0; ///< Clock low and high divider
@@ -47,9 +65,10 @@ namespace r2d2::i2c {
             ckdiv++;  ///< Increase clock devider
             cLHDiv /= 2;
         }
-        _selected->TWI_CWGR |= TWI_CWGR_CLDIV(cLHDiv) | TWI_CWGR_CHDIV(cLHDiv) |
-                               TWI_CWGR_CKDIV(ckdiv);
+        _selected->TWI_CWGR = TWI_CWGR_CLDIV(cLHDiv) | TWI_CWGR_CHDIV(cLHDiv) |
+                              TWI_CWGR_CKDIV(ckdiv);
     }
+
     void i2c_bus_c::init() {
         static bool init_done = false;
         if (init_done) {
@@ -62,12 +81,15 @@ namespace r2d2::i2c {
         clock_init();
         init_done = true;
     }
+
     void i2c_bus_c::write_byte(const uint8_t data) {
         _selected->TWI_THR = data;
     }
+
     uint8_t i2c_bus_c::read_byte() {
         return _selected->TWI_RHR;
     }
+
     i2c_bus_c::i2c_bus_c(const interface &selected_interface,
                          const uint32_t SPEED)
         : SPEED(SPEED) {
@@ -78,6 +100,7 @@ namespace r2d2::i2c {
         }
         init();
     }
+
     void i2c_bus_c::write(const uint_fast8_t address, const uint8_t data[],
                           const size_t n) {
         _selected->TWI_MMR = 0; ///< Reset master mode register
@@ -104,6 +127,7 @@ namespace r2d2::i2c {
         while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
         };
     }
+
     void i2c_bus_c::read(const uint8_t address, uint8_t *data,
                          const uint32_t n) {
 
@@ -118,10 +142,10 @@ namespace r2d2::i2c {
 
         if (count == 1) { ///< When only one byte needs to be read, transaction
                           ///< should be started and stopped at once.
-            _selected->TWI_CR |= TWI_CR_START | TWI_CR_STOP;
+            _selected->TWI_CR = TWI_CR_START | TWI_CR_STOP;
             stopTransaction = 1;
         } else {
-            _selected->TWI_CR |= TWI_CR_START;
+            _selected->TWI_CR = TWI_CR_START;
         }
 
         while (count > 0) {
@@ -131,7 +155,7 @@ namespace r2d2::i2c {
             }
 
             if (count == 1 && !stopTransaction) {
-                _selected->TWI_CR |= TWI_CR_STOP;
+                _selected->TWI_CR = TWI_CR_STOP;
                 stopTransaction = 1;
             }
 
