@@ -1,5 +1,5 @@
-#include "hwlib.hpp"
-#include "i2c_bus.hpp"
+#include <hwlib.hpp>
+#include <i2c_bus.hpp>
 
 int main(void) {
     // kill the watchdog
