@@ -27,9 +27,12 @@ auto bus = r2d2::i2c::i2c_bus_c(r2d2::i2c::i2c_bus_c::interface::interface_0, 50
 
 ```
 
-You can replace `r2d2::i2c::i2c_bus_c::interface::interface_0` with `r2d2::i2c::i2c_bus_c::interface::interface_1` if you need to use the secondary interface.
-This has not been tested yet.
+You can replace `r2d2::i2c::i2c_bus_c::interface::interface_0` with `r2d2::i2c::i2c_bus_c::interface::interface_1` if you need to use the secondary interface.  
 
+To use **sda** and **scl** you need to use `r2d2::i2c::i2c_bus_c::interface::interface_1`. To use **sda1** and **scl1** you need to use `r2d2::i2c::i2c_bus_c::interface::interface_0`.
+
+There is a chance you need to use pullup registers on a twi interface. Should work by default but interface_1 doesnt have internal pullup resistors.
+  
 Once instantiated you can use the read or the write function like so:
 
 ```c++
