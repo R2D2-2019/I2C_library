@@ -69,7 +69,7 @@ namespace r2d2::i2c {
          * @param n - amount of bytes to write
          */
         void write(const uint_fast8_t address, const uint8_t data[],
-                   const size_t n, const uint8_t *internal_address = nullptr,
+                   const size_t n, const uint32_t internal_address = 0,
                    const uint8_t internal_address_size = 0);
 
         /**
@@ -80,7 +80,7 @@ namespace r2d2::i2c {
          * @param n - the amount of b to read
          */
         void read(const uint8_t address, uint8_t *data, const uint32_t n,
-                  const uint8_t *internal_address = nullptr,
+                  const uint32_t internal_address = 0,
                   const uint8_t internal_address_size = 0);
     };
 }; // namespace r2d2::i2c
