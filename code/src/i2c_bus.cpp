@@ -126,7 +126,6 @@ namespace r2d2::i2c {
                                   internal_address[2];
             break;
         }
-        internal_address; ///< Set the internal device address
 
         uint32_t status = 0;
 
