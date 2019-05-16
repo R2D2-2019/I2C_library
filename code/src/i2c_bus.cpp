@@ -102,12 +102,32 @@ namespace r2d2::i2c {
     }
 
     void i2c_bus_c::write(const uint_fast8_t address, const uint8_t data[],
-                          const size_t n, const uint32_t internal_address,
+                          const size_t n, const uint8_t *internal_address,
                           const uint8_t internal_address_size) {
         _selected->TWI_MMR = 0; ///< Reset master mode register
-        _selected->TWI_MMR = 0 << 12 | address << 16 | internal_address_size << 8; ///< Set write, address and internal_address_size
-        _selected->TWI_IADR = internal_address; ///< Set the internal device address
-        
+        _selected->TWI_MMR =
+            0 << 12 | address << 16 |
+            internal_address_size
+                << 8; ///< Set write, address and internal_address_size
+        switch (internal_address_size) {
+        case 0:
+            _selected->TWI_IADR = 0; ///<>
+            break;
+        case 1:
+            _selected->TWI_IADR = internal_address[0];
+            break;
+        case 2:
+            _selected->TWI_IADR =
+                internal_address[0] << 8 | internal_address[1];
+            break;
+        case 3:
+            _selected->TWI_IADR = internal_address[0] << 16 |
+                                  internal_address[1] << 8 |
+                                  internal_address[2];
+            break;
+        }
+        internal_address; ///< Set the internal device address
+
         uint32_t status = 0;
 
         for (size_t i = 0; i < n; i++) {
@@ -130,12 +150,31 @@ namespace r2d2::i2c {
     }
 
     void i2c_bus_c::read(const uint8_t address, uint8_t *data, const uint32_t n,
-                         const uint32_t internal_address,
+                         const uint8_t *internal_address,
                          const uint8_t internal_address_size) {
 
         _selected->TWI_MMR = 0; ///< Reset master mode register
-        _selected->TWI_MMR = 0 << 12 | address << 16 | internal_address_size << 8; ///< Set write, address and internal_address_size
-        _selected->TWI_IADR = internal_address; ///< Set the internal device address
+        _selected->TWI_MMR =
+            0 << 12 | address << 16 |
+            internal_address_size
+                << 8; ///< Set write, address and internal_address_size
+        switch (internal_address_size) {
+        case 0:
+            _selected->TWI_IADR = 0; ///<>
+            break;
+        case 1:
+            _selected->TWI_IADR = internal_address[0];
+            break;
+        case 2:
+            _selected->TWI_IADR =
+                internal_address[0] << 8 | internal_address[1];
+            break;
+        case 3:
+            _selected->TWI_IADR = internal_address[0] << 16 |
+                                  internal_address[1] << 8 |
+                                  internal_address[2];
+            break;
+        }
 
         uint32_t status = 0; ///< Variable for holding status register
         uint32_t count = n;
