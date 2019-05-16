@@ -116,14 +116,15 @@ namespace r2d2::i2c {
         case 1:
             _selected->TWI_IADR = internal_address[0];
             break;
+
         case 2:
-            _selected->TWI_IADR =
-                internal_address[0] << 8 | internal_address[1];
+            _selected->TWI_IADR = internal_address[0] | 
+                                  internal_address[1] << 8;
             break;
         case 3:
-            _selected->TWI_IADR = internal_address[0] << 16 |
+            _selected->TWI_IADR = internal_address[0] |
                                   internal_address[1] << 8 |
-                                  internal_address[2];
+                                  internal_address[2] << 16;
             break;
         }
 
@@ -165,13 +166,13 @@ namespace r2d2::i2c {
             _selected->TWI_IADR = internal_address[0];
             break;
         case 2:
-            _selected->TWI_IADR =
-                internal_address[0] << 8 | internal_address[1];
+            _selected->TWI_IADR = internal_address[0] | internal_address[1]
+                                                            << 8;
             break;
         case 3:
-            _selected->TWI_IADR = internal_address[0] << 16 |
+            _selected->TWI_IADR = internal_address[0] |
                                   internal_address[1] << 8 |
-                                  internal_address[2];
+                                  internal_address[2] << 16;
             break;
         }
 
