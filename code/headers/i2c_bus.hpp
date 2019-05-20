@@ -67,6 +67,10 @@ namespace r2d2::i2c {
          * @param address - the device address
          * @param data - the data to send
          * @param n - amount of bytes to write
+         * @param internal_address - The internal register address of a device,
+         * this is only used when internal_address_size is bigger than 0.
+         * @param internal_address_size - The size in bytes of the internal
+         * register address of a devide. This isn't used by default.
          */
         void write(const uint_fast8_t address, const uint8_t data[],
                    const size_t n, const uint32_t internal_address = 0,
@@ -78,6 +82,10 @@ namespace r2d2::i2c {
          * @param address - the device address
          * @param data - the data to read
          * @param n - the amount of b to read
+         * @param internal_address - The internal register address of a device,
+         * this is only used when internal_address_size is bigger than 0.
+         * @param internal_address_size - The size in bytes of the internal
+         * register address of a devide. This isn't used by default.
          */
         void read(const uint8_t address, uint8_t *data, const uint32_t n,
                   const uint32_t internal_address = 0,
