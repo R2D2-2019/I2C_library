@@ -138,7 +138,7 @@ namespace r2d2::i2c {
 
         _selected->TWI_MMR = 0; ///< Reset master mode register
         _selected->TWI_MMR =
-            0 << 12 | address << 16 |
+            1 << 12 | address << 16 |
             internal_address_size
                 << 8; ///< Set write, address and internal_address_size
         _selected->TWI_IADR = (0x00FFFFFF & internal_address);
