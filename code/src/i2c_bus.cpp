@@ -3,7 +3,7 @@
 namespace r2d2::i2c {
 
     void i2c_bus_c::pin_init() {
-        auto config_pin = [](uint32_t pin, Pio * pio) {
+        auto config_pin = [](uint32_t pin, Pio *pio) {
             pio->PIO_ABSR &= (~pin & PIOA->PIO_ABSR);
             pio->PIO_PDR = pin;
             pio->PIO_IDR = pin;
@@ -102,10 +102,14 @@ namespace r2d2::i2c {
     }
 
     void i2c_bus_c::write(const uint_fast8_t address, const uint8_t data[],
-                          const size_t n) {
+                          const size_t n, const uint32_t internal_address,
+                          const uint8_t internal_address_size) {
         _selected->TWI_MMR = 0; ///< Reset master mode register
-        _selected->TWI_MMR = 0 << 12 | address << 16; ///< Set write and address
-        _selected->TWI_IADR = 0; ///< Clear internal address
+        _selected->TWI_MMR =
+            0 << 12 | address << 16 |
+            internal_address_size
+                << 8; ///< Set write, address and internal_address_size
+        _selected->TWI_IADR = (0x00FFFFFF & internal_address);
 
         uint32_t status = 0;
 
@@ -128,12 +132,16 @@ namespace r2d2::i2c {
         };
     }
 
-    void i2c_bus_c::read(const uint8_t address, uint8_t *data,
-                         const uint32_t n) {
+    void i2c_bus_c::read(const uint8_t address, uint8_t *data, const uint32_t n,
+                         const uint32_t internal_address,
+                         const uint8_t internal_address_size) {
 
         _selected->TWI_MMR = 0; ///< Reset master mode register
-        _selected->TWI_MMR = 1 << 12 | address << 16; ///< Set read and address
-        _selected->TWI_IADR = 0; ///< Clear internal address
+        _selected->TWI_MMR =
+            1 << 12 | address << 16 |
+            internal_address_size
+                << 8; ///< Set write, address and internal_address_size
+        _selected->TWI_IADR = (0x00FFFFFF & internal_address);
 
         uint32_t status = 0; ///< Variable for holding status register
         uint32_t count = n;
