@@ -112,17 +112,22 @@ namespace r2d2::i2c {
         _selected->TWI_IADR = (0x00FFFFFF & internal_address);
 
         uint32_t status = 0;
-
+        uint32_t timeout = 0;
         for (size_t i = 0; i < n; i++) {
             status = _selected->TWI_SR;
             if (status & TWI_SR_NACK) {
                 hwlib::cout << "status & NACK" << hwlib::endl;
             }
             while (1) {
+                timeout++;
                 status = _selected->TWI_SR;
                 if (status & TWI_SR_TXRDY) {
                     write_byte(data[i]);
+                    timeout = 0;
                     break;
+                }
+                if (timeout >= timeout_counter) {
+                    return;
                 }
             }
         }
@@ -156,9 +161,11 @@ namespace r2d2::i2c {
             _selected->TWI_CR = TWI_CR_START;
         }
 
+        uint32_t timeout = 0;
         while (count > 0) {
+            timeout++;
             status = _selected->TWI_SR;
-            if (status & TWI_SR_NACK) {
+            if (status & TWI_SR_TXCOMP) {
                 return;
             }
 
@@ -168,10 +175,13 @@ namespace r2d2::i2c {
             }
 
             if (!(status & TWI_SR_RXRDY)) {
+                if (timeout >= timeout_counter) {
+                    return;
+                }
                 continue;
             }
             data[n - count] = read_byte();
-
+            timeout = 0;
             count--;
         }
     }

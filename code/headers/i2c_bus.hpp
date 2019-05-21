@@ -46,6 +46,13 @@ namespace r2d2::i2c {
          */
         uint8_t read_byte();
 
+        /**
+         * The amount of times the loop will check the necessary registers in a
+         * transaction before timeing out. Times out silently.
+         * @internal
+         */
+        constexpr static uint32_t timeout_counter = 10000;
+
     public:
         /**
          * Enum of the possible interface you can select when instantiating this
