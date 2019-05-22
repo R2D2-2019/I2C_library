@@ -146,7 +146,7 @@ namespace r2d2::i2c {
             1 << 12 | address << 16 |
             internal_address_size
                 << 8; ///< Set write, address and internal_address_size
-        _selected->TWI_IADR = (0x00FFFFFF & internal_address);
+        _selected->TWI_IADR = (0xFFFFFF & internal_address);
 
         uint32_t status = 0; ///< Variable for holding status register
         uint32_t count = n;
@@ -165,9 +165,6 @@ namespace r2d2::i2c {
         while (count > 0) {
             timeout++;
             status = _selected->TWI_SR;
-            if (status & TWI_SR_TXCOMP) {
-                return;
-            }
 
             if (count == 1 && !stopTransaction) {
                 _selected->TWI_CR = TWI_CR_STOP;
@@ -184,5 +181,7 @@ namespace r2d2::i2c {
             timeout = 0;
             count--;
         }
+        while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
+        };
     }
 } // namespace r2d2::i2c
