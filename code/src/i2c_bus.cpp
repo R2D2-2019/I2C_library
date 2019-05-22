@@ -133,6 +133,7 @@ namespace r2d2::i2c {
         }
 
         _selected->TWI_CR = TWI_CR_STOP;
+        // Wait until the I2C bus is released.
         while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
         };
     }
@@ -181,6 +182,7 @@ namespace r2d2::i2c {
             timeout = 0;
             count--;
         }
+        // Wait until the I2C bus is released.
         while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
         };
     }
