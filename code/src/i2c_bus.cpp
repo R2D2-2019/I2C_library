@@ -112,22 +112,28 @@ namespace r2d2::i2c {
         _selected->TWI_IADR = (0x00FFFFFF & internal_address);
 
         uint32_t status = 0;
-
+        uint32_t timeout = 0;
         for (size_t i = 0; i < n; i++) {
             status = _selected->TWI_SR;
             if (status & TWI_SR_NACK) {
                 hwlib::cout << "status & NACK" << hwlib::endl;
             }
             while (1) {
+                timeout++;
                 status = _selected->TWI_SR;
                 if (status & TWI_SR_TXRDY) {
                     write_byte(data[i]);
+                    timeout = 0;
                     break;
+                }
+                if (timeout >= timeout_counter) {
+                    return;
                 }
             }
         }
 
         _selected->TWI_CR = TWI_CR_STOP;
+        // Wait until the I2C bus is released.
         while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
         };
     }
@@ -141,7 +147,7 @@ namespace r2d2::i2c {
             1 << 12 | address << 16 |
             internal_address_size
                 << 8; ///< Set write, address and internal_address_size
-        _selected->TWI_IADR = (0x00FFFFFF & internal_address);
+        _selected->TWI_IADR = (0xFFFFFF & internal_address);
 
         uint32_t status = 0; ///< Variable for holding status register
         uint32_t count = n;
@@ -156,11 +162,10 @@ namespace r2d2::i2c {
             _selected->TWI_CR = TWI_CR_START;
         }
 
+        uint32_t timeout = 0;
         while (count > 0) {
+            timeout++;
             status = _selected->TWI_SR;
-            if (status & TWI_SR_NACK) {
-                return;
-            }
 
             if (count == 1 && !stopTransaction) {
                 _selected->TWI_CR = TWI_CR_STOP;
@@ -168,11 +173,17 @@ namespace r2d2::i2c {
             }
 
             if (!(status & TWI_SR_RXRDY)) {
+                if (timeout >= timeout_counter) {
+                    return;
+                }
                 continue;
             }
             data[n - count] = read_byte();
-
+            timeout = 0;
             count--;
         }
+        // Wait until the I2C bus is released.
+        while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
+        };
     }
 } // namespace r2d2::i2c
