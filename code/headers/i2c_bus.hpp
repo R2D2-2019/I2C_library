@@ -98,6 +98,11 @@ namespace r2d2::i2c {
                   const uint32_t internal_address = 0,
                   const uint8_t internal_address_size = 0);
 
+        /**
+         * Changes the clockspeed of the bus at runtime
+         * 
+         * @param SPEED - the new speed in bits per second.
+         */
         void change_clock_speed(const uint32_t SPEED);
     };
 }; // namespace r2d2::i2c
