@@ -184,7 +184,7 @@ namespace r2d2::i2c {
         };
     }
 
-    void i2c_bus_c::change_clock_speed(const uint32_t SPEED){
+    void i2c_bus_c::change_clock_speed(const uint32_t SPEED) {
         this->SPEED = SPEED;
         clock_init();
     }
