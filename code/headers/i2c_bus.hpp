@@ -97,5 +97,7 @@ namespace r2d2::i2c {
         void read(const uint8_t address, uint8_t *data, const uint32_t n,
                   const uint32_t internal_address = 0,
                   const uint8_t internal_address_size = 0);
+
+        void change_clock_speed(const uint32_t SPEED);
     };
 }; // namespace r2d2::i2c
