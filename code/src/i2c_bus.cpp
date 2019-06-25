@@ -54,9 +54,6 @@ namespace r2d2::i2c {
         constexpr uint32_t masterClock = 84000000; ///< Master clock rate 84MHz
         uint32_t ckdiv = 0;                        ///< Clock divider
         uint32_t cLHDiv = 0; ///< Clock low and high divider
-        if (SPEED > 400000) {
-            return;
-        }
         cLHDiv = masterClock / (SPEED * 2) - 4;
 
         while ((cLHDiv > 0xFF) &&
@@ -185,5 +182,10 @@ namespace r2d2::i2c {
         // Wait until the I2C bus is released.
         while (!(_selected->TWI_SR & TWI_SR_TXCOMP)) {
         };
+    }
+
+    void i2c_bus_c::change_clock_speed(const uint32_t SPEED) {
+        this->SPEED = SPEED;
+        clock_init();
     }
 } // namespace r2d2::i2c
