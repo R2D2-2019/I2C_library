@@ -49,3 +49,7 @@ To use it, you just have to add the internal address and the size **in bytes** t
 `bus.read(address, data, n, internal_address, 2);`
 
 where internal_address is the address (maximum size is 3 bytes) and `2` means that the value of `internal_address` takes up two bytes.
+
+### Class Diagram
+
+![Class Diagram](https://user-images.githubusercontent.com/31630192/60755553-9529f380-9ff1-11e9-9692-94b074186563.png)
