@@ -1,5 +1,3 @@
-## Hardware I2C-library
-
 ## This library currently only supports the arduino DUE hardware TWI interface
 
 ### Including this library
@@ -27,12 +25,10 @@ auto bus = r2d2::i2c::i2c_bus_c(r2d2::i2c::i2c_bus_c::interface::interface_0, 50
 
 ```
 
-You can replace `r2d2::i2c::i2c_bus_c::interface::interface_0` with `r2d2::i2c::i2c_bus_c::interface::interface_1` if you need to use the secondary interface.  
+You can replace `r2d2::i2c::i2c_bus_c::interface::interface_0` with `r2d2::i2c::i2c_bus_c::interface::interface_1` if you need to use the secondary interface.
 
-To use **sda** and **scl** you need to use `r2d2::i2c::i2c_bus_c::interface::interface_1`. To use **sda1** and **scl1** you need to use `r2d2::i2c::i2c_bus_c::interface::interface_0`.
+**_IMPORTANT:_** while it might seem confusing, the I2C library uses the names as used in the datasheet. This means that if you want to use the `scl` and `sda` pins as printed on the DUE, you have to use `i2c_bus_c::interface::interface_1` and if you wish to use `scl1` and `sda1` as printed on the DUE, you have to use `i2c_bus_c::interface::interface_0`.
 
-There is a chance you need to use pullup registers on a twi interface. Should work by default but interface_1 doesnt have internal pullup resistors.
-  
 Once instantiated you can use the read or the write function like so:
 
 ```c++
@@ -43,3 +39,13 @@ bus.read(address, data, n);
 Where `data` is your data array and `address` is your 7-bit device address (i.e. `0x3C` for an OLED display)
 
 In the `read` example, data is your buffer and `n` is the amount of bytes you want to read.
+
+### Using `Repeated Start` or `Internal Address`
+
+Should you have a device that uses `repeated start` or an `internal address`, you need to modify your read/write calls.
+
+To use it, you just have to add the internal address and the size **in bytes** to the read/write calls, like so:
+
+`bus.read(address, data, n, internal_address, 2);`
+
+where internal_address is the address (maximum size is 3 bytes) and `2` means that the value of `internal_address` takes up two bytes.
